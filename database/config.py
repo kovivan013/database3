@@ -5,8 +5,9 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     SERVER_HOST: str = "127.0.0.1"
-    SERVER_PORT: str = "8000"
+    SERVER_PORT: int = 8000
 
+load_dotenv()
 class Database(BaseSettings):
     POSTGRES_DB: str = os.getenv("POSTGRES_DB")
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST")
@@ -14,9 +15,8 @@ class Database(BaseSettings):
     POSTGRES_USER: str = os.getenv("POSTGRES_USER")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD")
 
-    @classmethod
-    def get_db_name(cls):
-        return f"postgresql//:{cls.POSTGRES_USER}:{cls.POSTGRES_PASSWORD}@{cls.POSTGRES_HOST}:{cls.POSTGRES_PORT}/{cls.POSTGRES_DB}"
+    def get_db_name(self):
+        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
 settings = Settings()
 db = Database()
