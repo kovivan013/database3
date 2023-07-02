@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-BASE_SERVER_URL: str = settings.BASE_API_URL
+BASE_API_URL: str = settings.BASE_API_URL
 
 load_dotenv()
 storage = MemoryStorage()

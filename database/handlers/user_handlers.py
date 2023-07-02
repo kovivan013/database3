@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 
 from database3.database.database.db_connect import get_db
 from database3.database.models.models import User
-from database3.database.schemas.data_schemas import DataStructure
-from database3.database.schemas.schemas import UserCreate
+from database3.database.schemas.response_schemas import DataStructure
+from database3.database.schemas.request_schemas import UserCreate
 
 user_router = APIRouter()
 
