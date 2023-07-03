@@ -6,7 +6,7 @@ from database3.database.database.db_connect import get_db
 from database3.database.models.models import User
 from database3.database.schemas.response_schemas import DataStructure, ResponseStructure
 from database3.database.schemas.request_schemas import UserCreate, ClassCreate
-from database3.database.schemas.exceptions_schemas import UserExistsException
+from database3.database.schemas.exceptions_schemas import ItemExistsException
 
 user_router = APIRouter()
 
@@ -16,7 +16,7 @@ def create_user(new_user: UserCreate, response: Response, db: Session = Depends(
 
     user_exists: bool = db.query(User).filter(User.telegram_id == new_user.telegram_id).first() is not None
     if user_exists:
-        raise UserExistsException
+        raise ItemExistsException
 
     data: dict = {
         "telegram_id": new_user.telegram_id,
@@ -33,9 +33,18 @@ def create_user(new_user: UserCreate, response: Response, db: Session = Depends(
 def create_class(new_class: ClassCreate, response: Response, db: Session = Depends(get_db)):
     result = ResponseStructure()
 
-    data: dict = {
+    user = db.query(User).filter(User.telegram_id == new_class.owner).first()
+    edit_class: str = new_class.name
+    data: dict = dict(user.classes)
+    if edit_class in data:
+        raise ItemExistsException
 
-    }
+    data.update({edit_class: new_class.as_dict()})
+    class_users: list = list(data.get("all_users")) if data.get("all_users") is not None else []
+    class_users.append(new_class.owner)
+    data.get(edit_class).update({"all_users": class_users})
 
+    user.classes = data
+    db.commit()
     response.status_code = status.HTTP_201_CREATED
     return result.as_dict()

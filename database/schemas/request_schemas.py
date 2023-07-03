@@ -10,9 +10,9 @@ class UserCreate(BaseModel):
 
 class ClassCreate(BaseModel):
     owner: int
-    name: str
-    description: str
-    invite_code: str
+    name: str = ""
+    description: str = ""
+    invite_code: str = ""
     all_users: list = []
     admins: list = []
 
