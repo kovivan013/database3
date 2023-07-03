@@ -1,7 +1,7 @@
-from abc import abstractmethod, ABC
-
 import aiohttp
 
+from abc import abstractmethod, ABC
+from database3.database.schemas.response_schemas import DataStructure
 
 class RequestSender(ABC):
 
@@ -25,9 +25,14 @@ class RequestSender(ABC):
 
         try:
             async with aiohttp.ClientSession(**session_params) as session:
-                return await self._send(session)
+                answer: dict =  await self._send(session)
         except:
             raise Exception("API_ERROR")
+
+        status = answer.get("status")
+        data: dict = answer.get("answer_data")
+
+        return DataStructure(status=status, data=data).as_dict()
 
 class GetRequest(RequestSender):
 

@@ -1,14 +1,18 @@
+from config import dp
 from aiogram import executor
-from config import bot, dp
+from handlers.debug_handlers import register_debug_handlers
+
+register_debug_handlers(dp)
 
 async def on_startup(_) -> None:
-    print("bot started")
 
+    print("Bot started!")
 
 async def on_shutdown(_) -> None:
-    print("bot shutdown")
+    print("Bot shutdown!")
 
 def start_bot() -> None:
+
     executor.start_polling(dispatcher=dp,
                            skip_updates=True,
                            on_startup=on_startup,
