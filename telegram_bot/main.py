@@ -1,7 +1,9 @@
 from config import dp
 from aiogram import executor
+from handlers.user_handlers import register_user_handlers
 from handlers.debug_handlers import register_debug_handlers
 
+register_user_handlers(dp)
 register_debug_handlers(dp)
 
 async def on_startup(_) -> None:
