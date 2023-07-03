@@ -15,7 +15,7 @@ async def debug_handler(message: Message, state: FSMContext) -> None:
         await state.finish()
 
     await bot.send_message(chat_id=message.chat.id,
-                           text=f"Перед Вами главное меню:",
+                           text=f"*Перед Вами главное меню:*",
                            parse_mode="Markdown",
                            reply_markup=None)
 

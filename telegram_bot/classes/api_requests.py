@@ -1,7 +1,5 @@
 from database3.telegram_bot.config import BASE_API_URL
 from database3.telegram_bot.api.request_classes import GetRequest, PostRequest
-from database3.database.schemas.request_schemas import UserCreate
-import asyncio
 
 class API:
 
