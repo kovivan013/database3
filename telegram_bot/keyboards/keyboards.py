@@ -145,6 +145,11 @@ class ClassesMenu(Default, ControlMenu):
 
         if length > 0:
 
+            keyboard.add(
+                InlineKeyboardButton(text=f"Страница {cls.page_now}/{all_pages}",
+                                     callback_data=cls.create_class_callback)
+            )
+
             for h in range(1, cls.keyboard_height + 1):
                 add_first: bool = True
                 for w in range(1, cls.keyboard_width + 1):

@@ -37,6 +37,7 @@ class ClassesMenu_Handlers:
     async def edit_pages(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
         dct = {'ygduv': 86, 'dohqy': 64, 'rdkyr': 96, 'vwvrg': 70, 'icqzo': 100, 'ctrqs': 63, 'nulfe': 30, 'aqsda': 22, 'qhyqg': 24, 'nmijt': 10, 'xiyjc': 18, 'ledum': 56, 'hobjf': 9, 'gyzxd': 30, 'nxjhc': 52, 'stmeu': 57, 'qurwd': 57, 'qjmxq': 51, 'oypff': 2, 'rahfn': 65, 'bpulv': 26, 'bhjac': 79, 'uzenq': 46, 'rnurz': 10, 'tkpec': 22, 'ydmtt': 94, 'zbdii': 75, 'iosww': 27, 'kfxcg': 71, 'djlwp': 98, 'gvmps': 80}
+
         await callback.message.edit_reply_markup(reply_markup=ClassesMenu.keyboard(callback=callback.data, classes=dct))
 
 def register_user_handlers(dp: Dispatcher) -> None:
