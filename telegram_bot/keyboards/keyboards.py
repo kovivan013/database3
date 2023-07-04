@@ -1,13 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from dataclasses import dataclass
 from typing import Union
-from abc import ABC
-
-
-class Default(ABC):
-
-    default_callback: str = f"default_callback"
-    none_callback: str = f"none_callback"
+from database3.telegram_bot.utils.utils import Default
 
 
 def default_reply_keyboard(one_time_keyboard: bool = True, resize_keyboard: bool = True, row_width: int = 2):
@@ -88,7 +82,7 @@ class ControlMenu:
 
     forward: str = f"Вперёд ▶"
     backward: str = f"◀ Назад"
-    close: str = f"Закрыть ❌"
+    close: str = f"Закрыть ✖"
 
     forward_callback: str = f"forward_control_callback"
     backward_callback: str = f"backward_control_callback"
@@ -115,14 +109,14 @@ class StartMenu:
 @dataclass(frozen=True)
 class ClassesMenu(Default, ControlMenu):
 
-    add_class: str = f"➕ Создать новый класс"
+    create_class: str = f"➕ Создать новый класс"
     invite_link: str = f"🔗 Присоединиться к классу"
 
-    add_class_callback: str = f"add_class_callback"
+    create_class_callback: str = f"add_class_callback"
     invite_link_callback: str = f"invite_link_callback"
 
     keyboard_height: int = 5
-    keyboard_width: int = 3
+    keyboard_width: int = 2
     buttons_on_page: int = keyboard_height * keyboard_width
     page_now: int = 1
 
@@ -174,6 +168,25 @@ class ClassesMenu(Default, ControlMenu):
                         except:
                             break
 
+            keyboard.add(
+                InlineKeyboardButton(text=cls.backward,
+                                     callback_data=cls.backward_callback) if cls.page_now > 1 else InlineKeyboardButton(text="",
+                                                                                                                        callback_data=cls.none_callback),
+                InlineKeyboardButton(text=cls.close,
+                                     callback_data=cls.close_callback),
+                InlineKeyboardButton(text=cls.forward,
+                                     callback_data=cls.forward_callback) if cls.page_now < all_pages else InlineKeyboardButton(text="",
+                                                                                                                               callback_data=cls.none_callback)
+            )
+
+        keyboard.add(
+            InlineKeyboardButton(text=cls.create_class,
+                                 callback_data=cls.create_class_callback)
+        )
+        keyboard.add(
+            InlineKeyboardButton(text=cls.invite_link,
+                                 callback_data=cls.invite_link_callback)
+        )
 
         return keyboard
 
