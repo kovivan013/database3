@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
 
 class ClassCreate(BaseModel):
     owner: int
+    id: str
     name: str = ""
     description: str = ""
     invite_code: str = ""

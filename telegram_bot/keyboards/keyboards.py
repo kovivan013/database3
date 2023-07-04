@@ -1,7 +1,13 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from dataclasses import dataclass
-from database3.telegram_bot.utils.utils import Default
 from typing import Union
+from abc import ABC
+
+
+class Default(ABC):
+
+    default_callback: str = f"default_callback"
+    none_callback: str = f"none_callback"
 
 
 def default_reply_keyboard(one_time_keyboard: bool = True, resize_keyboard: bool = True, row_width: int = 2):
@@ -78,6 +84,18 @@ class YesOrNo:
 
 
 @dataclass(frozen=True)
+class ControlMenu:
+
+    forward: str = f"Вперёд ▶"
+    backward: str = f"◀ Назад"
+    close: str = f"Закрыть ❌"
+
+    forward_callback: str = f"forward_control_callback"
+    backward_callback: str = f"backward_control_callback"
+    close_callback: str = f"close_control_callback"
+
+
+@dataclass(frozen=True)
 class StartMenu:
 
     classes: str = f"👨‍🎓 Мои классы"
@@ -92,3 +110,72 @@ class StartMenu:
         )
 
         return keyboard
+
+
+@dataclass(frozen=True)
+class ClassesMenu(Default, ControlMenu):
+
+    add_class: str = f"➕ Создать новый класс"
+    invite_link: str = f"🔗 Присоединиться к классу"
+
+    add_class_callback: str = f"add_class_callback"
+    invite_link_callback: str = f"invite_link_callback"
+
+    keyboard_height: int = 5
+    keyboard_width: int = 3
+    buttons_on_page: int = keyboard_height * keyboard_width
+    page_now: int = 1
+
+    @classmethod
+    def callback_handler(cls, callback: str):
+
+        if callback == cls.default_callback:
+            cls.page_now = 1
+        elif callback == cls.forward_callback:
+            cls.page_now += 1
+        elif callback == cls.backward_callback:
+            cls.page_now -= 1
+
+    @classmethod
+    def keyboard(cls, callback: str = Default.default_callback, classes: dict = {}) -> Union[InlineKeyboardMarkup]:
+
+        keyboard = default_inline_keyboard(row_width=3)
+        cls.callback_handler(callback=callback)
+
+        length = len(classes)
+        all_pages: int = int(length / cls.buttons_on_page + 1)
+        page_end_index: int = cls.page_now * cls.buttons_on_page
+        element_now_index: int = page_end_index - cls.buttons_on_page
+
+        classes_dict: dict = {i: v for i, v in enumerate(classes.keys(), start=1)}
+
+        if length > 0:
+
+            for h in range(1, cls.keyboard_height + 1):
+                add_first: bool = True
+                for w in range(1, cls.keyboard_width + 1):
+                    element_now_index += 1
+
+                    if add_first:
+                        add_first = False
+                        try:
+                            keyboard.add(
+                                InlineKeyboardButton(text=classes_dict[element_now_index],
+                                                     callback_data="r")
+                            )
+                        except:
+                            break
+                    else:
+                        try:
+                            keyboard.insert(
+                                InlineKeyboardButton(text=classes_dict[element_now_index],
+                                                     callback_data="a")
+                            )
+                        except:
+                            break
+
+
+        return keyboard
+
+
+

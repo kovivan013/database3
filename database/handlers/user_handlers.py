@@ -2,6 +2,7 @@ from fastapi import Depends, APIRouter, Response
 from starlette import status
 from sqlalchemy.orm import Session
 
+from database3.database.utils.utils import gen_uuid
 from database3.database.database.db_connect import get_db
 from database3.database.models.models import User
 from database3.database.schemas.response_schemas import DataStructure, ResponseStructure
@@ -36,13 +37,15 @@ def create_class(new_class: ClassCreate, response: Response, db: Session = Depen
     user = db.query(User).filter(User.telegram_id == new_class.owner).first()
     edit_class: str = new_class.name
     data: dict = dict(user.classes)
+
     if edit_class in data:
         raise ItemExistsException
 
     data.update({edit_class: new_class.as_dict()})
-    class_users: list = list(data.get("all_users")) if data.get("all_users") is not None else []
-    class_users.append(new_class.owner)
-    data.get(edit_class).update({"all_users": class_users})
+
+    data.get(edit_class).update({"id": str(gen_uuid())})
+    data.get(edit_class).update({"all_users": [new_class.owner]})
+    data.get(edit_class).update({"description": new_class.description})
 
     user.classes = data
     db.commit()
