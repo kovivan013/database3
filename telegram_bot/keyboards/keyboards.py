@@ -143,7 +143,7 @@ class ClassesMenu(Default, ControlMenu):
 
         classes_dict: dict = {i: v for i, v in enumerate(classes.keys(), start=1)}
 
-        if length > 0:
+        if length:
 
             keyboard.add(
                 InlineKeyboardButton(text=f"Страница {cls.page_now}/{all_pages}",
@@ -154,7 +154,6 @@ class ClassesMenu(Default, ControlMenu):
                 add_first: bool = True
                 for w in range(1, cls.keyboard_width + 1):
                     element_now_index += 1
-
                     if add_first:
                         add_first = False
                         try:
@@ -175,12 +174,12 @@ class ClassesMenu(Default, ControlMenu):
 
         keyboard.add(
             InlineKeyboardButton(text=cls.backward,
-                                 callback_data=cls.backward_callback) if cls.page_now > 1 and length > 0 else InlineKeyboardButton(text="",
+                                 callback_data=cls.backward_callback) if cls.page_now > 1 and length else InlineKeyboardButton(text="",
                                                                                                                     callback_data=cls.none_callback),
             InlineKeyboardButton(text=cls.close,
                                  callback_data=cls.close_callback),
             InlineKeyboardButton(text=cls.forward,
-                                 callback_data=cls.forward_callback) if cls.page_now < all_pages and length > 0 else InlineKeyboardButton(text="",
+                                 callback_data=cls.forward_callback) if cls.page_now < all_pages and length else InlineKeyboardButton(text="",
                                                                                                                            callback_data=cls.none_callback)
         )
 
