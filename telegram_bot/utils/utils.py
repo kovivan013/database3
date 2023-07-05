@@ -25,4 +25,17 @@ class Default(ABC):
 # execution_time = end_time - start_time
 #
 # print(f"Время выполнения: {execution_time} секунд")
+#
+# from database3.telegram_bot.classes.api_requests import AdminAPI
+# import asyncio
+#
+# dct: dict = asyncio.run(AdminAPI.get_user_classes(telegram_id=5)).get("data")
+# my_dct: dict = {i: {v.get("name"): v.get("id")} for i, v in enumerate(dct.values(), start=1)}
+# print(my_dct)
+#
+# for i, v in my_dct.items():
+#     print(list(v.keys())[0])
+#
+# print(list(my_dct[1].values())[0])
+
 

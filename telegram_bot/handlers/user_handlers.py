@@ -1,5 +1,6 @@
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from dataclasses import dataclass
+from database3.telegram_bot.states.states import StartMenu_States
 from database3.telegram_bot.classes.api_requests import UserAPI, AdminAPI
 from database3.telegram_bot.keyboards.keyboards import StartMenu, ClassesMenu
 from database3.telegram_bot.config import Dispatcher
@@ -23,6 +24,7 @@ class StartMenu_Handlers:
     @classmethod
     async def classes_button(cls, message: Message, state: FSMContext) -> None:
 
+        await StartMenu_States.classes_menu.set()
         user_classes: dict = dict(await AdminAPI.get_user_classes(telegram_id=message.from_user.id)).get("data")
         await message.answer(text=f"Выберите нужный класс из списка:" if user_classes else "У Вас пока нет доступных классов...\n"
                                                                                            "Создайте свой или присоединитесь к существующему!",
@@ -39,6 +41,16 @@ class ClassesMenu_Handlers:
         user_classes: dict = dict(await AdminAPI.get_user_classes(telegram_id=callback.from_user.id)).get("data")
         await callback.message.edit_reply_markup(reply_markup=ClassesMenu.keyboard(callback=callback.data, classes=user_classes))
 
+    @classmethod
+    async def get_class(cls, callback: CallbackQuery, state: FSMContext) -> None:
+
+        user_classes: dict = dict(await AdminAPI.get_user_classes(telegram_id=callback.from_user.id)).get("data")
+        for v in user_classes.values():
+            if v.get("id") == callback.data:
+                print(v.get("name"), "|", v.get("id"))
+
+
+
 def register_user_handlers(dp: Dispatcher) -> None:
 
     dp.register_message_handler(
@@ -48,8 +60,11 @@ def register_user_handlers(dp: Dispatcher) -> None:
         StartMenu_Handlers.classes_button, Text(equals=StartMenu.classes), state=None
     )
     dp.register_callback_query_handler(
-        ClassesMenu_Handlers.edit_pages, Text(equals=ClassesMenu.forward_callback), state=None
+        ClassesMenu_Handlers.edit_pages, Text(equals=ClassesMenu.forward_callback), state=StartMenu_States.classes_menu
     )
     dp.register_callback_query_handler(
-        ClassesMenu_Handlers.edit_pages, Text(equals=ClassesMenu.backward_callback), state=None
+        ClassesMenu_Handlers.edit_pages, Text(equals=ClassesMenu.backward_callback), state=StartMenu_States.classes_menu
+    )
+    dp.register_callback_query_handler(
+        ClassesMenu_Handlers.get_class, state=StartMenu_States.classes_menu
     )

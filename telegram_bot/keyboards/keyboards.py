@@ -121,29 +121,29 @@ class ClassesMenu(Default, ControlMenu):
     page_now: int = 1
 
     @classmethod
-    def callback_handler(cls, callback: str):
+    def callback_handler(cls, callback: str, last_page: int):
 
         if callback == cls.default_callback:
             cls.page_now = 1
-        elif callback == cls.forward_callback:
+        elif callback == cls.forward_callback and cls.page_now < last_page:
             cls.page_now += 1
-        elif callback == cls.backward_callback:
+        elif callback == cls.backward_callback and cls.page_now > 1:
             cls.page_now -= 1
 
     @classmethod
     def keyboard(cls, callback: str = Default.default_callback, classes: dict = {}) -> Union[InlineKeyboardMarkup]:
 
-        keyboard = default_inline_keyboard(row_width=3)
-        cls.callback_handler(callback=callback)
-
         length = len(classes)
+        keyboard = default_inline_keyboard(row_width=3)
         all_pages: int = int(length / cls.buttons_on_page + 1)
+        cls.callback_handler(callback=callback, last_page=all_pages)
+
         page_end_index: int = cls.page_now * cls.buttons_on_page
         element_now_index: int = page_end_index - cls.buttons_on_page
 
-        classes_dict: dict = {i: v for i, v in enumerate(classes.keys(), start=1)}
+        classes_dict: dict = {i: {v.get("name"): v.get("id")} for i, v in enumerate(classes.values(), start=1)}
 
-        if length:
+        if classes:
 
             keyboard.add(
                 InlineKeyboardButton(text=f"Страница {cls.page_now}/{all_pages}",
@@ -158,28 +158,28 @@ class ClassesMenu(Default, ControlMenu):
                         add_first = False
                         try:
                             keyboard.add(
-                                InlineKeyboardButton(text=classes_dict[element_now_index],
-                                                     callback_data="r")
+                                InlineKeyboardButton(text=list(classes_dict[element_now_index].keys())[0],
+                                                     callback_data=list(classes_dict[element_now_index].values())[0])
                             )
                         except:
                             break
                     else:
                         try:
                             keyboard.insert(
-                                InlineKeyboardButton(text=classes_dict[element_now_index],
-                                                     callback_data="a")
+                                InlineKeyboardButton(text=list(classes_dict[element_now_index].keys())[0],
+                                                     callback_data=list(classes_dict[element_now_index].values())[0])
                             )
                         except:
                             break
 
         keyboard.add(
             InlineKeyboardButton(text=cls.backward,
-                                 callback_data=cls.backward_callback) if cls.page_now > 1 and length else InlineKeyboardButton(text="",
+                                 callback_data=cls.backward_callback) if cls.page_now > 1 and classes else InlineKeyboardButton(text="",
                                                                                                                     callback_data=cls.none_callback),
             InlineKeyboardButton(text=cls.close,
                                  callback_data=cls.close_callback),
             InlineKeyboardButton(text=cls.forward,
-                                 callback_data=cls.forward_callback) if cls.page_now < all_pages and length else InlineKeyboardButton(text="",
+                                 callback_data=cls.forward_callback) if cls.page_now < all_pages and classes else InlineKeyboardButton(text="",
                                                                                                                            callback_data=cls.none_callback)
         )
 
