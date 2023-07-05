@@ -142,7 +142,6 @@ class ClassesMenu(Default, ControlMenu):
         element_now_index: int = page_end_index - cls.buttons_on_page
 
         classes_dict: dict = {i: v for i, v in enumerate(classes.keys(), start=1)}
-        print(classes_dict)
 
         if length > 0:
 
