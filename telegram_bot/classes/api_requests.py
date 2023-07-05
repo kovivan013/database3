@@ -32,3 +32,17 @@ class UserAPI(API):
         }
 
         return await cls._post_request(data=data, endpoint=endpoint)
+
+class AdminAPI(API):
+
+    __URL: str = "/admin"
+
+    @classmethod
+    async def get_user_classes(cls, telegram_id: int):
+
+        endpoint: str = cls.__URL + f"/user_classes"
+        data: dict = {
+            "telegram_id": telegram_id
+        }
+
+        return await cls._post_request(data=data, endpoint=endpoint)

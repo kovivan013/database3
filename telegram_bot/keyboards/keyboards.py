@@ -142,6 +142,7 @@ class ClassesMenu(Default, ControlMenu):
         element_now_index: int = page_end_index - cls.buttons_on_page
 
         classes_dict: dict = {i: v for i, v in enumerate(classes.keys(), start=1)}
+        print(classes_dict)
 
         if length > 0:
 
@@ -173,16 +174,16 @@ class ClassesMenu(Default, ControlMenu):
                         except:
                             break
 
-            keyboard.add(
-                InlineKeyboardButton(text=cls.backward,
-                                     callback_data=cls.backward_callback) if cls.page_now > 1 else InlineKeyboardButton(text="",
-                                                                                                                        callback_data=cls.none_callback),
-                InlineKeyboardButton(text=cls.close,
-                                     callback_data=cls.close_callback),
-                InlineKeyboardButton(text=cls.forward,
-                                     callback_data=cls.forward_callback) if cls.page_now < all_pages else InlineKeyboardButton(text="",
-                                                                                                                               callback_data=cls.none_callback)
-            )
+        keyboard.add(
+            InlineKeyboardButton(text=cls.backward,
+                                 callback_data=cls.backward_callback) if cls.page_now > 1 and length > 0 else InlineKeyboardButton(text="",
+                                                                                                                    callback_data=cls.none_callback),
+            InlineKeyboardButton(text=cls.close,
+                                 callback_data=cls.close_callback),
+            InlineKeyboardButton(text=cls.forward,
+                                 callback_data=cls.forward_callback) if cls.page_now < all_pages and length > 0 else InlineKeyboardButton(text="",
+                                                                                                                           callback_data=cls.none_callback)
+        )
 
         keyboard.add(
             InlineKeyboardButton(text=cls.create_class,

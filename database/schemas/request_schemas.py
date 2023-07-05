@@ -7,6 +7,8 @@ class UserCreate(BaseModel):
     def as_dict(self) -> dict:
         return self.__dict__
 
+class GetUser(BaseModel):
+    telegram_id: int = 0
 
 class ClassCreate(BaseModel):
     owner: int
