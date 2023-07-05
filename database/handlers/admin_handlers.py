@@ -5,6 +5,7 @@ from database3.database.database.db_connect import get_db
 from database3.database.schemas.response_schemas import ResponseStructure
 from database3.database.schemas.request_schemas import GetUser
 from database3.database.models.models import User
+from database3.database.schemas.exceptions_schemas import ItemNotFoundException
 
 admin_router = APIRouter()
 
@@ -15,4 +16,4 @@ def get_user_classes(data: GetUser, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.telegram_id == data.telegram_id).first()
     if user:
         return dict(user.classes)
-    raise
+    raise ItemNotFoundException

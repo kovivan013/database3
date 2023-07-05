@@ -24,7 +24,8 @@ class StartMenu_Handlers:
     async def classes_button(cls, message: Message, state: FSMContext) -> None:
 
         user_classes: dict = dict(await AdminAPI.get_user_classes(telegram_id=message.from_user.id)).get("data")
-        await message.answer(text=f"Выберите нужный класс из списка:",
+        await message.answer(text=f"Выберите нужный класс из списка:" if user_classes else "У Вас пока нет доступных классов...\n"
+                                                                                           "Создайте свой или присоединитесь к существующему!",
                              parse_mode="Markdown",
                              reply_markup=ClassesMenu.keyboard(classes=user_classes))
 

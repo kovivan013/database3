@@ -25,3 +25,4 @@ class Default(ABC):
 # execution_time = end_time - start_time
 #
 # print(f"Время выполнения: {execution_time} секунд")
+
