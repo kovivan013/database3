@@ -5,6 +5,15 @@ class Default(ABC):
     default_callback: str = f"default_callback"
     none_callback: str = f"none_callback"
 
+import uuid
+
+def valid_uuid(guid: str):
+    try:
+        uuid_obj = uuid.UUID(guid)
+        return str(uuid_obj) == guid
+    except ValueError:
+        return False
+
 # import uuid
 # import string
 # import random
@@ -34,6 +43,7 @@ class Default(ABC):
 # print(my_dct)
 #
 # for i, v in my_dct.items():
+#     print([i for i in v.keys()][0])
 #     print(list(v.keys())[0])
 #
 # print(list(my_dct[1].values())[0])

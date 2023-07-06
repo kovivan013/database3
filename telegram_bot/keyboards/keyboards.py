@@ -135,7 +135,7 @@ class ClassesMenu(Default, ControlMenu):
 
         length = len(classes)
         keyboard = default_inline_keyboard(row_width=3)
-        all_pages: int = int(length / cls.buttons_on_page + 1)
+        all_pages: int = -int(-length // cls.buttons_on_page)
         cls.callback_handler(callback=callback, last_page=all_pages)
 
         page_end_index: int = cls.page_now * cls.buttons_on_page
@@ -147,7 +147,7 @@ class ClassesMenu(Default, ControlMenu):
 
             keyboard.add(
                 InlineKeyboardButton(text=f"Страница {cls.page_now}/{all_pages}",
-                                     callback_data=cls.create_class_callback)
+                                     callback_data=cls.none_callback)
             )
 
             for h in range(1, cls.keyboard_height + 1):
@@ -190,6 +190,33 @@ class ClassesMenu(Default, ControlMenu):
         keyboard.add(
             InlineKeyboardButton(text=cls.invite_link,
                                  callback_data=cls.invite_link_callback)
+        )
+
+        return keyboard
+
+
+@dataclass(frozen=True)
+class InClassMenu(Default, ControlMenu):
+
+    posts_board: str = f"📑 Доска объявлений"
+    available_tasks: str = f"✍ Доступные задания"
+    settings: str = f"⚙️ Настройки"
+
+    posts_board_callback: str = f"posts_board_callback"
+    available_tasks_callback: str = f"available_tasks_callback"
+    settings_callback: str = f"settings_callback"
+
+    @classmethod
+    def keyboard(cls, user_role: str = "member") -> Union[InlineKeyboardMarkup]:
+        keyboard = default_inline_keyboard(row_width=1)
+
+        keyboard.add(
+            InlineKeyboardButton(text=cls.posts_board,
+                                 callback_data=cls.posts_board_callback),
+            InlineKeyboardButton(text=cls.available_tasks,
+                                 callback_data=cls.available_tasks_callback),
+            InlineKeyboardButton(text=cls.settings,
+                                 callback_data=cls.settings_callback)
         )
 
         return keyboard

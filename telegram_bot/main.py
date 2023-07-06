@@ -7,7 +7,6 @@ register_user_handlers(dp)
 register_debug_handlers(dp)
 
 async def on_startup(_) -> None:
-
     print("Bot started!")
 
 async def on_shutdown(_) -> None:
