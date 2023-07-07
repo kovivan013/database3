@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from database3.telegram_bot.states.states import ClassesMenu_States, InClassMenu_States
 from database3.telegram_bot.classes.api_requests import UserAPI, AdminAPI
 from database3.telegram_bot.keyboards.keyboards import StartMenu, ClassesMenu, InClassMenu, YesOrNo
-from database3.telegram_bot.config import Dispatcher
+from database3.telegram_bot.config import Dispatcher, bot
 from database3.telegram_bot.utils.utils import valid_uuid
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -66,7 +66,8 @@ class RegisterClass_Handlers:
     @classmethod
     async def yes_or_no(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
-        await callback.message.edit_text(text=f"Вы действительно желаете новый класс?",
+        await ClassesMenu_States.register_request.set()
+        await callback.message.edit_text(text=f"Вы действительно желаете создать новый класс?",
                                          parse_mode="Markdown",
                                          reply_markup=YesOrNo.inline_keyboard())
 
@@ -95,14 +96,20 @@ class RegisterClass_Handlers:
 
         try:
             await message.delete()
-            await ans_msg.delete()
+            async with state.proxy() as data:
+                await data["ans_msg"].delete()
         except:
             pass
 
         if len(message.text) > 28 or "\\" in message.text:
-            ans_msg = await bot.send_message(chat_id=message.from_user.id,
-                                             text=f"Некорректное имя, попробуйте снова!",
-                                             parse_mode="Markdown")
+            async with state.proxy() as data:
+                data["ans_msg"] = await bot.send_message(chat_id=message.from_user.id,
+                                                         text=f"Некорректное имя, попробуйте снова!",
+                                                         parse_mode="Markdown")
+        else:
+            async with state.proxy() as data:
+                data["name"] = message.text
+            await cls.description_request(message=message, state=state)
 
     @classmethod
     async def description_request(cls, message: Message, state: FSMContext) -> None:
@@ -118,14 +125,20 @@ class RegisterClass_Handlers:
 
         try:
             await message.delete()
-            await ans_msg.delete()
+            async with state.proxy() as data:
+                await data["ans_msg"].delete()
         except:
             pass
 
         if len(message.text) > 54 or "\\" in message.text:
-            ans_msg = await bot.send_message(chat_id=message.from_user.id,
-                                             text=f"Некорректное описание, попробуйте снова!",
-                                             parse_mode="Markdown")
+            async with state.proxy() as data:
+                data["ans_msg"] = await bot.send_message(chat_id=message.from_user.id,
+                                                         text=f"Некорректное описание, попробуйте снова!",
+                                                         parse_mode="Markdown")
+        else:
+            async with state.proxy() as data:
+                data["description"] = message.text
+            await cls.finish_registration(message=message, state=state)
 
     @classmethod
     async def finish_registration(cls, message: Message, state: FSMContext) -> None:
@@ -135,6 +148,21 @@ class RegisterClass_Handlers:
             await data["reg_msg"].edit_text(text=f"Регистрация завершена, создаем класс?",
                                             parse_mode="Markdown",
                                             reply_markup=YesOrNo.inline_keyboard())
+
+    @classmethod
+    async def register_new_class(cls, callback: CallbackQuery, state: FSMContext) -> None:
+
+        async with state.proxy() as data:
+            await UserAPI.create_class(telegram_id=callback.from_user.id,
+                                       name=data.get("name"),
+                                       description=data.get("description"))
+            await state.finish()
+            await callback.message.delete()
+            await bot.send_message(chat_id=callback.from_user.id,
+                                   text=f"Новый класс успешно создан!",
+                                   parse_mode="Markdown",
+                                   reply_markup=StartMenu.keyboard())
+
 
 
 
@@ -171,4 +199,16 @@ def register_user_handlers(dp: Dispatcher) -> None:
     )
     dp.register_callback_query_handler(
         ClassesMenu_Handlers.get_class, state=ClassesMenu_States.menu
+    )
+    dp.register_callback_query_handler(
+        RegisterClass_Handlers.name_request, Text(equals=YesOrNo.yes_callback), state=ClassesMenu_States.register_request
+    )
+    dp.register_callback_query_handler(
+        RegisterClass_Handlers.register_new_class, Text(equals=YesOrNo.yes_callback), state=ClassesMenu_States.finish_register
+    )
+    dp.register_message_handler(
+        RegisterClass_Handlers.check_name, state=ClassesMenu_States.name_request
+    )
+    dp.register_message_handler(
+        RegisterClass_Handlers.check_description, state=ClassesMenu_States.description_request
     )
