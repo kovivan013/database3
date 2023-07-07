@@ -18,15 +18,17 @@ def default_inline_keyboard(row_width: int = 2):
 
 
 @dataclass(frozen=True)
-class YesOrNo:
+class YesOrNo(Default):
 
     yes: str = f"✅ Да"
     no: str = f"❌ Нет"
     cancel: str = f"🛑 Отмена"
+    skip: str = f"▶▶ Пропустить"
 
     yes_callback: str = f"yes_callback"
     no_callback: str = f"no_callback"
     cancel_callback: str = f"cancel_callback"
+    skip_callback: str = f"skip_callback"
 
     @classmethod
     def keyboard(cls) -> Union[ReplyKeyboardMarkup]:
@@ -55,23 +57,28 @@ class YesOrNo:
         return keyboard
 
     @classmethod
-    def cancel_keyboard(cls) -> Union[ReplyKeyboardMarkup]:
+    def cancel_keyboard(cls, with_skip: bool = False) -> Union[ReplyKeyboardMarkup]:
 
         keyboard = default_reply_keyboard()
 
         keyboard.add(
-            KeyboardButton(text=cls.cancel)
+            KeyboardButton(text=cls.cancel),
+            KeyboardButton(text=cls.skip) if with_skip else KeyboardButton(text="")
         )
 
         return keyboard
 
     @classmethod
-    def cancel_inline_keyboard(cls) -> Union[InlineKeyboardMarkup]:
+    def cancel_inline_keyboard(cls, with_skip: bool = False) -> Union[InlineKeyboardMarkup]:
         keyboard = default_inline_keyboard()
 
         keyboard.add(
             InlineKeyboardButton(text=cls.cancel,
-                                 callback_data=cls.cancel_callback)
+                                 callback_data=cls.cancel_callback),
+            InlineKeyboardButton(text=cls.skip,
+                                 callback_data=cls.skip_callback) if with_skip else InlineKeyboardButton(text="",
+                                                                                                         callback_data=cls.none_callback)
+
         )
 
         return keyboard

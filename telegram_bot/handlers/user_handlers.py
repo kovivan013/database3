@@ -39,9 +39,7 @@ class ClassesMenu_Handlers:
     @classmethod
     async def create_class(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
-        await callback.message.edit_text(text=f"Вы действительно желаете новый класс?",
-                                         parse_mode="Markdown",
-                                         reply_markup=YesOrNo.inline_keyboard())
+        await RegisterClass_Handlers.yes_or_no(callback=callback, state=state)
 
     @classmethod
     async def edit_pages(cls, callback: CallbackQuery, state: FSMContext) -> None:
@@ -61,6 +59,84 @@ class ClassesMenu_Handlers:
                     class_description: str = v.get("description")
 
             await InClassMenu_Handlers.menu(callback=callback, state=state, class_name=class_name, class_description=class_description)
+
+@dataclass(frozen=True)
+class RegisterClass_Handlers:
+
+    @classmethod
+    async def yes_or_no(cls, callback: CallbackQuery, state: FSMContext) -> None:
+
+        await callback.message.edit_text(text=f"Вы действительно желаете новый класс?",
+                                         parse_mode="Markdown",
+                                         reply_markup=YesOrNo.inline_keyboard())
+
+    @classmethod
+    async def cancel_handler(cls, callback: CallbackQuery, state: FSMContext) -> None:
+
+        await state.finish()
+        await callback.message.delete()
+        await bot.send_message(chat_id=callback.message.from_user.id,
+                               text=f"Успешная отмена!",
+                               parse_mode="Markdown",
+                               reply_markup=StartMenu.keyboard())
+
+    @classmethod
+    async def name_request(cls, callback: CallbackQuery, state: FSMContext) -> None:
+
+        await ClassesMenu_States.name_request.set()
+
+        async with state.proxy() as data:
+            data["reg_msg"] = await callback.message.edit_text(text=f"Введите имя для нового класс:",
+                                                               parse_mode="Markdown",
+                                                               reply_markup=YesOrNo.cancel_inline_keyboard())
+
+    @classmethod
+    async def check_name(cls, message: Message, state: FSMContext) -> None:
+
+        try:
+            await message.delete()
+            await ans_msg.delete()
+        except:
+            pass
+
+        if len(message.text) > 28 or "\\" in message.text:
+            ans_msg = await bot.send_message(chat_id=message.from_user.id,
+                                             text=f"Некорректное имя, попробуйте снова!",
+                                             parse_mode="Markdown")
+
+    @classmethod
+    async def description_request(cls, message: Message, state: FSMContext) -> None:
+
+        await ClassesMenu_States.description_request.set()
+        async with state.proxy() as data:
+            await data["reg_msg"].edit_text(text=f"Введите описание для нового класса:",
+                                            parse_mode="Markdown",
+                                            reply_markup=YesOrNo.cancel_inline_keyboard(with_skip=True))
+
+    @classmethod
+    async def check_description(cls, message: Message, state: FSMContext) -> None:
+
+        try:
+            await message.delete()
+            await ans_msg.delete()
+        except:
+            pass
+
+        if len(message.text) > 54 or "\\" in message.text:
+            ans_msg = await bot.send_message(chat_id=message.from_user.id,
+                                             text=f"Некорректное описание, попробуйте снова!",
+                                             parse_mode="Markdown")
+
+    @classmethod
+    async def finish_registration(cls, message: Message, state: FSMContext) -> None:
+
+        await ClassesMenu_States.finish_register.set()
+        async with state.proxy() as data:
+            await data["reg_msg"].edit_text(text=f"Регистрация завершена, создаем класс?",
+                                            parse_mode="Markdown",
+                                            reply_markup=YesOrNo.inline_keyboard())
+
+
 
 
 @dataclass(frozen=True)
