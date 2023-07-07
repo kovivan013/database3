@@ -20,28 +20,9 @@ def valid_uuid(guid: str):
 #     return sliced_dict
 
 # Пример словаря
-my_dict: dict = {1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f', 7: 'g', 8: 'h', 9: 'i', 10: 'j', 11: 'k', 12: 'l', 13: 'm', 14: 'n', 15: 'o', 16: 'p', 17: 'q', 18: 'r', 19: 's', 20: 't', 21: 'u', 22: 'v', 23: 'w', 24: 'x', 25: 'y', 26: 'z'}
-
-my_list: list = [1,2,3]
 
 # for i, v in enumerate(my_dict.keys(), start=0):
 #     print(i+1, v)
-
-def slice_dict(start, end, dictionary: dict = {}):
-    for i in range(1, start+1):
-        dictionary.pop(i)
-    my_dict = {i: v for i, v in reversed(dictionary.items())}
-    for i in range(len(dictionary), end):
-        dictionary.pop(i)
-
-print(my_dict)
-my_dict = {i: v for i, v in reversed(my_dict.items())}
-print(my_dict)
-
-slice_dict(start=9, end=20, dictionary=my_dict)
-print(my_dict)
-
-
 
 # Выделение части словаря от ключа "a" до ключа "b"
 # sliced_dict = slice_dict(my_dict, "a", "c")

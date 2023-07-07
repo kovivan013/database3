@@ -12,7 +12,7 @@ class GetUser(BaseModel):
 
 class ClassCreate(BaseModel):
     owner: int
-    id: str
+    id: str = ""
     name: str = ""
     description: str = ""
     invite_code: str = ""

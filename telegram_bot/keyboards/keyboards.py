@@ -144,7 +144,9 @@ class ClassesMenu(Default, ControlMenu):
         classes_dict: dict = {i: {v.get("name"): v.get("id")} for i, v in enumerate(classes.values(), start=1)}
 
         if check_keyboard:
-            print(None)
+            classes_ids = [i.get("id") for i in classes.values()]
+            return classes_ids
+
 
         if classes:
 

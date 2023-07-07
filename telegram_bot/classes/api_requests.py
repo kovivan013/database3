@@ -33,6 +33,18 @@ class UserAPI(API):
 
         return await cls._post_request(data=data, endpoint=endpoint)
 
+    @classmethod
+    async def create_class(cls, telegram_id: int, name: str, description: str = ""):
+
+        endpoint: str = cls.__URL + "/create_class"
+        data: dict = {
+            "owner": telegram_id,
+            "name": name,
+            "description": ""
+        }
+
+        return await cls._post_request(data=data, endpoint=endpoint)
+
 class AdminAPI(API):
 
     __URL: str = "/admin"
