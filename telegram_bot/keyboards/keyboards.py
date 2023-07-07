@@ -131,7 +131,7 @@ class ClassesMenu(Default, ControlMenu):
             cls.page_now -= 1
 
     @classmethod
-    def keyboard(cls, callback: str = Default.default_callback, classes: dict = {}) -> Union[InlineKeyboardMarkup]:
+    def keyboard(cls, check_keyboard: bool = False, callback: str = Default.default_callback, classes: dict = {}) -> Union[InlineKeyboardMarkup]:
 
         length = len(classes)
         keyboard = default_inline_keyboard(row_width=3)
@@ -142,6 +142,9 @@ class ClassesMenu(Default, ControlMenu):
         element_now_index: int = page_end_index - cls.buttons_on_page
 
         classes_dict: dict = {i: {v.get("name"): v.get("id")} for i, v in enumerate(classes.values(), start=1)}
+
+        if check_keyboard:
+            print(None)
 
         if classes:
 

@@ -53,6 +53,8 @@ class ClassesMenu_Handlers:
     async def get_class(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
         await callback.answer()
+        for i in callback.message.reply_markup.iter_values():
+            print(i)
         if valid_uuid(callback.data):
             user_classes: dict = dict(await AdminAPI.get_user_classes(telegram_id=callback.from_user.id)).get("data")
             for v in user_classes.values():
