@@ -27,10 +27,12 @@ class StartMenu_Handlers:
 
         await ClassesMenu_States.menu.set()
         user_classes: dict = dict(await AdminAPI.get_user_classes(telegram_id=message.from_user.id)).get("data")
-        await message.answer(text=f"Выберите нужный класс из списка:" if user_classes else "У Вас пока нет доступных классов...\n"
-                                                                                           "Создайте свой или присоединитесь к существующему!",
-                             parse_mode="Markdown",
-                             reply_markup=ClassesMenu.keyboard(classes=user_classes))
+        async with state.proxy() as data:
+            data["user_classes"] = user_classes
+            await message.answer(text=f"Выберите нужный класс из списка:" if user_classes else "У Вас пока нет доступных классов...\n"
+                                                                                               "Создайте свой или присоединитесь к существующему!",
+                                 parse_mode="Markdown",
+                                 reply_markup=ClassesMenu.keyboard(classes=user_classes))
 
 
 @dataclass(frozen=True)
@@ -44,13 +46,16 @@ class ClassesMenu_Handlers:
     @classmethod
     async def edit_pages(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
-        user_classes: dict = dict(await AdminAPI.get_user_classes(telegram_id=callback.from_user.id)).get("data")
+
+        async with state.proxy() as data:
+            user_classes: dict = dict(data["user_classes"])
         await callback.message.edit_reply_markup(reply_markup=ClassesMenu.keyboard(callback=callback.data, classes=user_classes))
 
     @classmethod
     async def get_class(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
-        user_classes: dict = dict(await AdminAPI.get_user_classes(telegram_id=callback.from_user.id)).get("data")
+        async with state.proxy() as data:
+            user_classes: dict = dict(data["user_classes"])
 
         if callback.data in ClassesMenu.keyboard(check_keyboard=True, classes=user_classes):
             for v in user_classes.values():
@@ -67,19 +72,38 @@ class RegisterClass_Handlers:
     async def yes_or_no(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
         await ClassesMenu_States.register_request.set()
-        await callback.message.edit_text(text=f"Вы действительно желаете создать новый класс?",
+        await callback.message.edit_text(text=f"*Вы действительно желаете создать новый класс?*",
                                          parse_mode="Markdown",
                                          reply_markup=YesOrNo.inline_keyboard())
 
     @classmethod
     async def cancel_handler(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
+        await cls.delete_last_message(message=None, state=state)
         await state.finish()
         await callback.message.delete()
-        await bot.send_message(chat_id=callback.message.from_user.id,
-                               text=f"Успешная отмена!",
+        await bot.send_message(chat_id=callback.from_user.id,
+                               text=f"*Успешная отмена!*",
                                parse_mode="Markdown",
                                reply_markup=StartMenu.keyboard())
+
+    @classmethod
+    async def skip_handler(cls, callback: CallbackQuery, state: FSMContext) -> None:
+
+        await cls.check_description(skip_check=True, message=None, state=state)
+
+    @classmethod
+    async def delete_last_message(cls, message: Message, state: FSMContext) -> None:
+
+        try:
+            await message.delete()
+        except:
+            pass
+        try:
+            async with state.proxy() as data:
+                await data["ans_msg"].delete()
+        except:
+            pass
 
     @classmethod
     async def name_request(cls, callback: CallbackQuery, state: FSMContext) -> None:
@@ -87,65 +111,73 @@ class RegisterClass_Handlers:
         await ClassesMenu_States.name_request.set()
 
         async with state.proxy() as data:
-            data["reg_msg"] = await callback.message.edit_text(text=f"Введите имя для нового класс:",
+            data["reg_msg"] = await callback.message.edit_text(text=f"*Введите имя для нового класс:*",
                                                                parse_mode="Markdown",
                                                                reply_markup=YesOrNo.cancel_inline_keyboard())
 
     @classmethod
     async def check_name(cls, message: Message, state: FSMContext) -> None:
 
-        try:
-            await message.delete()
-            async with state.proxy() as data:
-                await data["ans_msg"].delete()
-        except:
-            pass
+        await cls.delete_last_message(message=message, state=state)
 
-        if len(message.text) > 28 or "\\" in message.text:
-            async with state.proxy() as data:
+        async with state.proxy() as data:
+            user_classes: dict = dict(data["user_classes"])
+        classes_list: list = []
+        user = message.from_user.id
+
+        for v in user_classes.values():
+            if v.get("owner") == user:
+                classes_list.append(v.get("name"))
+        print(classes_list)
+
+        async with state.proxy() as data:
+
+            if message.text in classes_list:
                 data["ans_msg"] = await bot.send_message(chat_id=message.from_user.id,
-                                                         text=f"Некорректное имя, попробуйте снова!",
+                                                         text=f"*Такое имя уже существует, попробуйте снова!*",
                                                          parse_mode="Markdown")
-        else:
-            async with state.proxy() as data:
-                data["name"] = message.text
-            await cls.description_request(message=message, state=state)
+            else:
+                if len(message.text) > 28 or "\\" in message.text or message.text in classes_list:
+                    data["ans_msg"] = await bot.send_message(chat_id=message.from_user.id,
+                                                             text=f"*Некорректное имя, попробуйте снова!*",
+                                                             parse_mode="Markdown")
+                else:
+                    data["name"] = message.text
+                    await cls.description_request(message=message, state=state)
 
     @classmethod
     async def description_request(cls, message: Message, state: FSMContext) -> None:
 
         await ClassesMenu_States.description_request.set()
         async with state.proxy() as data:
-            await data["reg_msg"].edit_text(text=f"Введите описание для нового класса:",
+            await data["reg_msg"].edit_text(text=f"*Введите описание для нового класса:*",
                                             parse_mode="Markdown",
                                             reply_markup=YesOrNo.cancel_inline_keyboard(with_skip=True))
 
     @classmethod
-    async def check_description(cls, message: Message, state: FSMContext) -> None:
+    async def check_description(cls, message: Message, state: FSMContext, skip_check: bool = False) -> None:
 
-        try:
-            await message.delete()
-            async with state.proxy() as data:
-                await data["ans_msg"].delete()
-        except:
-            pass
+        await cls.delete_last_message(message=message, state=state)
 
-        if len(message.text) > 54 or "\\" in message.text:
-            async with state.proxy() as data:
+        if skip_check:
+            await cls.finish_registration(state=state)
+            return
+
+        async with state.proxy() as data:
+            if len(message.text) > 54 or "\\" in message.text:
                 data["ans_msg"] = await bot.send_message(chat_id=message.from_user.id,
-                                                         text=f"Некорректное описание, попробуйте снова!",
+                                                         text=f"*Некорректное описание, попробуйте снова!*",
                                                          parse_mode="Markdown")
-        else:
-            async with state.proxy() as data:
+            else:
                 data["description"] = message.text
-            await cls.finish_registration(message=message, state=state)
+                await cls.finish_registration(state=state)
 
     @classmethod
-    async def finish_registration(cls, message: Message, state: FSMContext) -> None:
+    async def finish_registration(cls, state: FSMContext) -> None:
 
         await ClassesMenu_States.finish_register.set()
         async with state.proxy() as data:
-            await data["reg_msg"].edit_text(text=f"Регистрация завершена, создаем класс?",
+            await data["reg_msg"].edit_text(text=f"*Регистрация завершена, создаем класс?*",
                                             parse_mode="Markdown",
                                             reply_markup=YesOrNo.inline_keyboard())
 
@@ -155,16 +187,13 @@ class RegisterClass_Handlers:
         async with state.proxy() as data:
             await UserAPI.create_class(telegram_id=callback.from_user.id,
                                        name=data.get("name"),
-                                       description=data.get("description"))
+                                       description=data.get("description") if data.get("description") is not None else "")
             await state.finish()
             await callback.message.delete()
             await bot.send_message(chat_id=callback.from_user.id,
-                                   text=f"Новый класс успешно создан!",
+                                   text=f"*Новый класс успешно создан!*",
                                    parse_mode="Markdown",
                                    reply_markup=StartMenu.keyboard())
-
-
-
 
 
 @dataclass(frozen=True)
@@ -174,7 +203,7 @@ class InClassMenu_Handlers:
     async def menu(cls, callback: CallbackQuery, state: FSMContext, class_name: str = "", class_description: str = "") -> None:
 
         await InClassMenu_States.menu.set()
-        text: str = f"👨‍🎓 *{str.title(class_name)}*\n\n"
+        text: str = f"👨‍🎓 *{str.capitalize(class_name)}*\n\n"
         await callback.message.edit_text(text=text + f"📃 {class_description}" if class_description else text,
                                          parse_mode="Markdown",
                                          reply_markup=InClassMenu.keyboard())
@@ -205,6 +234,21 @@ def register_user_handlers(dp: Dispatcher) -> None:
     )
     dp.register_callback_query_handler(
         RegisterClass_Handlers.register_new_class, Text(equals=YesOrNo.yes_callback), state=ClassesMenu_States.finish_register
+    )
+    dp.register_callback_query_handler(
+        RegisterClass_Handlers.cancel_handler, Text(equals=YesOrNo.no_callback), state=ClassesMenu_States.register_request
+    )
+    dp.register_callback_query_handler(
+        RegisterClass_Handlers.cancel_handler, Text(equals=YesOrNo.cancel_callback), state=ClassesMenu_States.name_request
+    )
+    dp.register_callback_query_handler(
+        RegisterClass_Handlers.cancel_handler, Text(equals=YesOrNo.cancel_callback), state=ClassesMenu_States.description_request
+    )
+    dp.register_callback_query_handler(
+        RegisterClass_Handlers.cancel_handler, Text(equals=YesOrNo.no_callback), state=ClassesMenu_States.finish_register
+    )
+    dp.register_callback_query_handler(
+        RegisterClass_Handlers.skip_handler, Text(equals=YesOrNo.skip_callback), state=ClassesMenu_States.description_request
     )
     dp.register_message_handler(
         RegisterClass_Handlers.check_name, state=ClassesMenu_States.name_request

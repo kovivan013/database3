@@ -40,7 +40,7 @@ class UserAPI(API):
         data: dict = {
             "owner": telegram_id,
             "name": name,
-            "description": ""
+            "description": description
         }
 
         return await cls._post_request(data=data, endpoint=endpoint)
