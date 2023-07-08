@@ -4,7 +4,6 @@ from database3.telegram_bot.states.states import ClassesMenu_States, InClassMenu
 from database3.telegram_bot.classes.api_requests import UserAPI, AdminAPI
 from database3.telegram_bot.keyboards.keyboards import StartMenu, ClassesMenu, InClassMenu, YesOrNo
 from database3.telegram_bot.config import Dispatcher, bot
-from database3.telegram_bot.utils.utils import valid_uuid
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.dispatcher.filters import Text
 
@@ -128,7 +127,6 @@ class RegisterClass_Handlers:
         for v in user_classes.values():
             if v.get("owner") == user:
                 classes_list.append(v.get("name"))
-        print(classes_list)
 
         async with state.proxy() as data:
 

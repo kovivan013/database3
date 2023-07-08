@@ -100,6 +100,7 @@ class ControlMenu:
 class StartMenu:
 
     classes: str = f"👨‍🎓 Мои классы"
+    get_loc: str = "🗺 Получить локацию"
 
     @classmethod
     def keyboard(cls) -> Union[ReplyKeyboardMarkup]:

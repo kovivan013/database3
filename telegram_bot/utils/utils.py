@@ -1,18 +1,12 @@
 from abc import ABC
+import uuid
+import string
+import random
 
 class Default(ABC):
 
     default_callback: str = f"default_callback"
     none_callback: str = f"none_callback"
-
-import uuid
-
-def valid_uuid(guid: str):
-    try:
-        uuid_obj = uuid.UUID(guid)
-        return str(uuid_obj) == guid
-    except ValueError:
-        return False
 
 # def slice_dict(start, end, dictionary: dict = {}):
 #     for i, v in enumerate(my_dict.keys(), start=0):

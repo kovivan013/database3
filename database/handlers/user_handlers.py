@@ -2,7 +2,7 @@ from fastapi import Depends, APIRouter, Response
 from starlette import status
 from sqlalchemy.orm import Session
 
-from database3.database.utils.utils import gen_uuid
+from database3.database.utils.utils import gen_uuid, gen_invite_code
 from database3.database.database.db_connect import get_db
 from database3.database.models.models import User
 from database3.database.schemas.response_schemas import DataStructure, ResponseStructure
@@ -44,6 +44,7 @@ def create_class(new_class: ClassCreate, response: Response, db: Session = Depen
     data.update({edit_class: new_class.as_dict()})
 
     data.get(edit_class).update({"id": str(gen_uuid())})
+    data.get(edit_class).update({"invite_code": str(gen_invite_code())})
     data.get(edit_class).update({"all_users": [new_class.owner]})
     data.get(edit_class).update({"description": new_class.description})
 
