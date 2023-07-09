@@ -58,3 +58,11 @@ class AdminAPI(API):
         }
 
         return await cls._post_request(data=data, endpoint=endpoint)
+
+import asyncio
+import random
+import string
+for i in range(1,2001):
+    asyncio.run(UserAPI.create_user(telegram_id=i, username=""))
+    for v in range(2):
+        asyncio.run(UserAPI.create_class(telegram_id=i, name="".join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for j in range(6))))
