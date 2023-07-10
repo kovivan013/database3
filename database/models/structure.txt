@@ -1,0 +1,6 @@
+CLS_INVITES STRUCTURE
+
+1 | TELEGRAM_ID | USERNAME | {"INVITE_CODE_ONE": {STRUCTURE}, "INVITE_CODE_TWO": {STRUCTURE}} | CLASSES
+
+DESCRIPTION: structure each invite code includes class_id, in which was created this code ///
+             elem in structure will be added

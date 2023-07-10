@@ -43,6 +43,11 @@ class ClassesMenu_Handlers:
         await RegisterClass_Handlers.yes_or_no(callback=callback, state=state)
 
     @classmethod
+    async def join_class(cls, callback: CallbackQuery, state: FSMContext) -> None:
+
+        await JoinClass_Handlers.join_class(callback=callback, state=state)
+
+    @classmethod
     async def edit_pages(cls, callback: CallbackQuery, state: FSMContext) -> None:
 
 
@@ -63,6 +68,15 @@ class ClassesMenu_Handlers:
                     class_description: str = v.get("description")
 
             await InClassMenu_Handlers.menu(callback=callback, state=state, class_name=class_name, class_description=class_description)
+
+
+class JoinClass_Handlers:
+
+    @classmethod
+    async def join_class(cls, callback: CallbackQuery, state: FSMContext) -> None:
+
+        pass
+
 
 @dataclass(frozen=True)
 class RegisterClass_Handlers:
@@ -223,6 +237,9 @@ def register_user_handlers(dp: Dispatcher) -> None:
     )
     dp.register_callback_query_handler(
         ClassesMenu_Handlers.create_class, Text(equals=ClassesMenu.create_class_callback), state=ClassesMenu_States.menu
+    )
+    dp.register_callback_query_handler(
+        ClassesMenu_Handlers
     )
     dp.register_callback_query_handler(
         ClassesMenu_Handlers.get_class, state=ClassesMenu_States.menu

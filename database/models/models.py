@@ -8,3 +8,4 @@ class User(BaseModel):
     telegram_id = Column(BigInteger, primary_key=True, index=True)
     username = Column(String, default="")
     classes = Column(JSON, default={})
+    classes = Column(JSON, default={})
